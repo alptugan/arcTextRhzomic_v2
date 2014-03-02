@@ -1,0 +1,7 @@
+ofxFontStash
+ofxFTGL
+ofxMSATimer
+ofxOpenCv
+ofxSQLite
+ofxUI
+ofxUnicode
