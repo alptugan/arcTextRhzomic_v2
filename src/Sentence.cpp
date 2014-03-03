@@ -44,17 +44,14 @@ string utf8_substr2(const string &str,int start, int length=INT_MAX)
 Sentence::Sentence(string str, ofxFontStash *_font, int sPosX,int sPosY)
 {
 	yoff = 0.0;
-	xPrev = 0;
-	yPrev = 0;
-	zPrev = 0;
 
 
 	myString = str;
     myFont = _font;
 
-	speed = 0.01f+ofRandomf()/100.f;
+	
 
-	yStart = 100 + ofRandom(ofGetHeight()-200);
+	yStart = sPosY;
     
     //currentChar = utf8_substr2(myString,i,1);
     
@@ -72,6 +69,8 @@ Sentence::Sentence(string str, ofxFontStash *_font, int sPosX,int sPosY)
     //char myArray[myString.size()];
     //strcpy(myArray, utf8_substr2(myString,0,strLen).c_str());
     
+    letters.resize(strLen);
+    
     for (int i = 0; i < strLen; i++) {
     /*
         
@@ -82,12 +81,10 @@ Sentence::Sentence(string str, ofxFontStash *_font, int sPosX,int sPosY)
         
         l->letter_ = &myArray;*/
         
-        letters.push_back(utf8_substr2(myString,i,1));
+        letters[i] = utf8_substr2(myString,i,1);
         
         //cout <<  << endl;
     }
-    
-    
 }
 
 
@@ -102,34 +99,28 @@ void Sentence::update(){
 
 void Sentence::draw(){
     
-	ofSetColor(0,225,0);
+	//ofSetColor(0,120,0);
 
 	int i = 0;
 
-	float xoff = 0; 
-	float zoff = 0; 
+	xoff = 0;
 
 	string currentChar; 
 	float x = 0;
-	float z = 0;
-    
-    
-    
-	//for (float x = 0; x <= ofGetWidth(); x += 10) {
+    p = ofGetMouseX();
+    l = p / 10;
+    //cout << l << endl;
+	myFont->beginBatch();
 	while(x <= ofGetWidth()){
 		
 		
 		// Calculate a y value according to noise, map to 
-		float y = ofMap(ofNoise(xoff, yoff), 0, 1, 0,yStart+100); // Option #1: 2D Noise
-		float z = 10*ofNoise(zoff);
+		float y = yStart + ofMap(ofNoise(xoff, yoff), 0, 1, 0,400); // Option #1: 2D Noise
     
 		// Set the vertex
 		if(x > 0){
-			//ofLine(xPrev,yPrev,x,y);
-            
+            line.addVertex(ofVec2f(x,y));
 			if(i < strLen){
-
-				
 
 				ofVec2f tanVec = ofVec2f(xPrev,yPrev) - ofVec2f(x,y);
 
@@ -141,22 +132,26 @@ void Sentence::draw(){
                 ofPushMatrix();
 				ofTranslate(x,y);
 				ofRotateZ(arcTan);
+                //cout << line[i].getRotatedRad(x, y, 1.0f).z << endl;
+                //cout << arcTan << endl;
 				//float scaleVal = ofMap(x, 0, ofGetWidth(), 0, 0.9);
-                float p = ofGetMouseX() / ofGetWidth();
-                float scaleVal = ofMap(x/ofGetMouseX(), 0, ofGetWidth(), 0, 0.9);
-                //cout<< p << endl;
+               
+                float scaleVal = ofMap(x, 0, ofGetWidth(), 0, 0.9);
+                
                 float alphaVal = ofMap(x,0,ofGetWidth(),10,255);
                 
-                ofScale(1-scaleVal,1-scaleVal,1);
+                ofScale(scaleFac,scaleFac,1);
+                
                 
                 ofSetColor(255-(alphaVal));
 				if(i > startShine && i< stopShine){
 					ofSetColor(225,0,0);
 				}else{
-					ofSetColor(0,200,0);
+					ofSetColor(0,120,0);
 				}
                 
 				myFont->drawBatch(letters[i],24, 0, 0);
+                
                 ofPopMatrix();
 			}
 		
@@ -167,26 +162,37 @@ void Sentence::draw(){
 
 		xPrev = x;
 		yPrev = y;
-		zPrev = z;
 		// Increment x dimension for noise
-		//xoff += ofMap(mouseX, 0, ofGetWidth(), 0,0.1);
-		xoff += 0.008;
-		//zoff += 0.008;
+		//xoff += ofMap(p, 0, ofGetWidth(), 0,0.1);
+        xoff += xFactor;
 
-		x += 10;	
-
-
+		x += 10;
+        
+        
 	}
+    myFont->endBatch();
     
+    //yoff += ofMap(ofGetMouseY(), 0, ofGetHeight(), 0.001,0.05);
     yoff += speed;
     
-	
+	line.draw();
+    
+    line.clear();
 
 } 
 
-void Sentence::setup(float speed){
+void Sentence::setSpeed(float _speed){
    
-	
+	speed = _speed;
+}
+
+void Sentence::setFactorNoiseX(float _x){
+    
+	xFactor = _x;
+}
+
+void Sentence::setScale(float _scale) {
+    scaleFac = _scale;
 }
 
 void Sentence::highLight(float _startShine, float _stopShine){

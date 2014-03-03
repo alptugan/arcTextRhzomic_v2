@@ -5,7 +5,7 @@ void testApp::setup(){
     ofEnableAlphaBlending();
 	ofSetVerticalSync(true);
 	ofSetFrameRate(30);
-	ofBackground(0);
+    ofBackground(0);
     
     
     // Interaction
@@ -13,13 +13,32 @@ void testApp::setup(){
     vidGrabber.initGrabber(320,240);
     colorImg.allocate(320,240);
     
-    threshold = 80;
+    actionThreshold[0] = 10;
+    actionThreshold[1] = 10;
+    actionThreshold[2] = 10;
+    actionThreshold[3] = 10;
+    actionThreshold[4] = 10;
     
-    actionThreshold[0] = 500;
-    actionThreshold[1] = 500;
-    actionThreshold[2] = 500;
-    actionThreshold[3] = 500;
-    actionThreshold[4] = 500;
+    
+    // GUI
+    gui.setup();
+    gui.add(fps.setup("FrameRate",framerate));
+    gui.add(camSwitch.setup("show Video",false));
+    gui.add(thres1.setup("Threshold 1st Region" ,actionThreshold[0],0,1000));
+    gui.add(thres2.setup("Threshold 2st Region" ,actionThreshold[1],0,1000));
+    gui.add(thres3.setup("Threshold 3st Region" ,actionThreshold[2],0,1000));
+    gui.add(thres4.setup("Threshold 4st Region" ,actionThreshold[3],0,1000));
+    gui.add(thres5.setup("Threshold 5st Region" ,actionThreshold[4],0,1000));
+    gui.add(threshold.setup("Threshold Gray Image" ,80,0,200));
+    gui.add(timeLimit.setup("Set Delay Time" ,8,0,40));
+    thres.push_back(thres1);
+    thres.push_back(thres2);
+    thres.push_back(thres3);
+    thres.push_back(thres4);
+    thres.push_back(thres5);
+    
+    // Load recent values at startup
+    gui.loadFromFile("settings.xml");
     
     // Read Sentences from database
     sqlite = new ofxSQLite("rizomi.db");
@@ -33,54 +52,39 @@ void testApp::setup(){
 		sel.next();
         //if(id < 1)
         name = ofUTF8::toUpper(name);
-        texts.push_back(name);
+        texts.resize(texts.size()+1);
+        texts[texts.size()-1] = name;
 	}
     
     
-    // load fonts
+    // load font
     font = new ofxFontStash();
     font->setup("mono.ttf"); //load verdana font, set lineHeight to be 130%
     
-    
+    // Create Sentence Objects
     SentenceNum = texts.size();
     SentenceNum = 30;
     cout << "Sentence size : "<< SentenceNum << endl;
+    
+    sentences.resize(SentenceNum);
+    
     for (int j = 0; j < SentenceNum; j++) {
-        Sentence *sentence = new Sentence(texts[j],font, 0, 35 + 24*j);
-        sentences.push_back(sentence);
+        Sentence *sentence = new Sentence(texts[j],font, 0, 12*j);
+        sentences[j] = sentence;
+        sentences[j]->setSpeed(ofRandom(0.0008, 0.01));
+        sentences[j]->setFactorNoiseX(ofRandom(0.003, 0.02));
     }
     
-	fbo.allocate(1024, 768);
     
-    fbo.begin();
-    ofBackground(0);
-    fbo.end();
-    
-    
+    // Tween Values
+    /*unsigned duration = 1000;
+    unsigned delay = 0;
+    tweenexpo.setParameters(1,easingexpo,ofxTween::easeOut,0,1,duration,delay);*/
     
 }
 
 //--------------------------------------------------------------
 void testApp::update(){
-    fbo.begin();
-    ofClear(0);
-    
-    for (int j = 0; j < 100; j++) {
-        /*if(lineAcounter % 10 == 0) {
-            lineAlpha = lineAlpha - 1;
-            
-            if(lineAlpha < 10)
-                lineAlpha=255;
-        }*/
-        
-        
-        
-        drawLines(0,200,j,j*10);
-    }
-    fbo.end();
-    
-    lineAcounter++;
-    
     
     // Interaction
     bool bNewFrame = false;
@@ -99,7 +103,6 @@ void testApp::update(){
 			bLearnBakground = false;
 		}
         
-		// take the abs value of the difference between background and incoming and then threshold:
 		grayDiff.absDiff(grayBg, grayImage);
 		grayDiff.threshold(threshold);
         
@@ -139,13 +142,11 @@ void testApp::update(){
                     if(x > grayDiff.getWidth() * 0.6 && x < grayDiff.getWidth() * 0.8){
                         
                         weights[3]++;
-                        
                     }
                     
                     if(x > grayDiff.getWidth() * 0.8 && x < grayDiff.getWidth()){
                         
                         weights[4]++;
-                        
                     }
                     
                     
@@ -158,85 +159,144 @@ void testApp::update(){
         
         
 	}
+    
+    if(timer.getSeconds() > timeLimit) {
+        
+        timer.reset();
+        isResetCalled=false;
+        isNoMovement = true;
+    }
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
-    fbo.draw(0, 0);
-    grayDiff.draw(20,20);
-    ofSetColor(255);
-    ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 14);
+    //Ugly hack move background line upper
+    ofPushMatrix();
+    ofTranslate(0, -200);
+    if(camSwitch)
+        grayDiff.draw(20,20,ofGetWidth(),ofGetHeight());
     
+    for (int j = 0; j < 80; j++) {
+        ofSetColor(0, 255, 0,ofMap(j, 0, 80, 0, 100));
+        drawLines(0,200,j,j*10,ofMap(j, 0, 80, 1, 8));
+    }
+    ofPopMatrix();
     
+    // Start to draw sentences
+    ofSetLineWidth(1);
     
-    font->beginBatch();
     for (int j = 0; j < SentenceNum; j++) {
-        
-        //font->drawBatch(texts[j], 24, 0, 35+20 * j);
-        
-        
-        
+
         sentences[j]->draw();
         
     }
     
     
-    font->endBatch();
+    // Hide/Show gui
+    if( !bHide ){
     
+		gui.draw();
+	}
+    
+    // Check if there is any viewer in front of related region
     for(int i = 0; i<5 ; i++){
-        if(weights[i] > actionThreshold[i]){
-            
-            ofDrawBitmapString("Region "+ofToString(i), 500, 330+i*20);
-            
+        
+        if(weights[i] > thres[i]){
+            if( !bHide ){
+                ofSetColor(255);
+                ofDrawBitmapString("Region "+ofToString(i), 500, 330+i*20);
+            }
+            resetToDefaultValues();
+
+        }else{
+            setIdleMode();
         }
     }
     
+    ofSetColor(255);
+    fps = ofToString(ofGetFrameRate());
+    //ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 14);
 }
 
-void testApp::drawLines(int min,int max, float _xoff, float _yoff) {
-    float xoff = _xoff;
-    int i = 0;
+//
+// Reset Animation points to original state
+//
+void testApp::resetToDefaultValues() {
     
-    for (float x = 0; x < ofGetWidth(); x += 10) {
+    if(!isResetCalled) {
+        isResetCalled = true;
+        //cout << "reset called" << endl;
+        for (int j = 0; j < SentenceNum; j++) {
+            sentences[j]->setSpeed(ofRandom(0.008, 0.01));
+            sentences[j]->setFactorNoiseX(ofRandom(0.008, 0.01));
+             sentences[j]->setScale(1);
+        }
+        
+        timer.start();
+        
+    }
+}
+
+//
+// Set idle mode if there is no interaction with cam
+//
+void testApp::setIdleMode() {
+    
+    if(isNoMovement) {
+        for (int j = 0; j < SentenceNum; j++) {
+            sentences[j]->setSpeed(0.0008);
+            sentences[j]->setScale(0.2);
+            sentences[j]->setFactorNoiseX((j+4)*0.0003);
+        }
+        
+        isNoMovement = false;
+    }
+}
+
+
+//
+// Draw background lines
+//
+void testApp::drawLines(int min,int max, float _xoff, float _yoff,int linew) {
+    float xoff = _xoff;
+    
+    for (float x = 0; x < ofGetWidth(); x += 20) {
         
 		
         // Calculate a y value according to noise, map to
         float y = _yoff+ofMap(ofNoise(xoff+_xoff, yoff), 0, 1, min,max);
         
         if(x >0){
-            ofSetLineWidth(1);
-            ofFill();
-            //ofSetHexColor(10);
-            //int alphaVal = ofMap(x,0,ofGetWidth(),0,255);
-
+            ofSetLineWidth(linew);
             
-            ofSetColor(0,100,0);
-            
-            ofLine(xPrev,yPrev,x,y);
-            //ofLine(xPrev,(yPrev-20),x,(y-20));
-            /* ofSetColor(225);
-             */
-            
-            i++;
-            
+            line.addVertex(ofPoint(x,y));
         }
         
         
-        xPrev = x;
-        yPrev = y;
-        // Increment x dimension for noise
-        //xoff += ofMap(mouseX, 0, ofGetWidth(), 0,0.01);
         xoff += 0.01;
 	}
-	// increment y dimension for noise
-	//yoff += ofMap(mouseY, 0, ofGetHeight(), 0,0.01);
 	yoff += 0.00005;
-
+    line.draw();
+    line.clear();
     
 }
+
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
-
+    // hide gui
+    if( key == 'h' ){
+		bHide = !bHide;
+	}
+    
+    // save current settings
+	if(key == 's') {
+		gui.saveToFile("settings.xml");
+	}
+    
+    // load settings from file / reset to default values
+	if(key == 'l') {
+		gui.loadFromFile("settings.xml");
+	}
 }
 
 //--------------------------------------------------------------

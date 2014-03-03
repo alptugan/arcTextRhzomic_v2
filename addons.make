@@ -1,5 +1,6 @@
 ofxFontStash
 ofxFTGL
+ofxGui
 ofxMSATimer
 ofxOpenCv
 ofxSQLite

@@ -1,0 +1,17 @@
+<group>
+    <fill>1</fill>
+    <radius>140</radius>
+    <center>512, 384</center>
+    <color>100, 100, 140, 255</color>
+    <circle_res>5</circle_res>
+    <screen_size>1024x768</screen_size>
+<group/>
+	<show_Video>0</show_Video>
+	<Threshold_1st_Region>55</Threshold_1st_Region>
+	<Threshold_2st_Region>35</Threshold_2st_Region>
+	<Threshold_3st_Region>50</Threshold_3st_Region>
+	<Threshold_4st_Region>80</Threshold_4st_Region>
+	<Threshold_5st_Region>90</Threshold_5st_Region>
+<Threshold_Gray_Image>137</Threshold_Gray_Image>
+<Set_Delay_Time>8</Set_Delay_Time>
+</group>

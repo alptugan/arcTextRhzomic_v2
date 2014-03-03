@@ -5,6 +5,8 @@
 #include "ofxFontStash.h"
 #include "Sentence.h"
 #include "ofxOpenCv.h"
+#include "ofxGui.h"
+#include "MSATimer.h"
 
 class testApp : public ofBaseApp{
 
@@ -22,22 +24,22 @@ class testApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+    
+     void resetToDefaultValues();
+    void setIdleMode();
+    bool isResetCalled = false;
+    bool isNoMovement = true;
 		
-    void drawLines(int min,int max, float _xoff, float _yoff);
+    void drawLines(int min,int max, float _xoff, float _yoff,int linew);
     
     
     ofxFontStash* font;
     int SentenceNum;
     vector<Sentence*> sentences;
     
-    ofFbo fbo;
-    ofPolyline poli;
-    
     float speed = 0.01f+ofRandomf()/100.f;
     float xPrev,yPrev;
     float yoff;
-    int lineAcounter;
-    int lineAlpha = 255;
     
     
     // Interaction
@@ -47,13 +49,42 @@ class testApp : public ofBaseApp{
     ofxCvGrayscaleImage 	grayImage;
     ofxCvGrayscaleImage 	grayBg;
     bool				bLearnBakground;
-    int 				threshold;
+
     bool mirror;
     
     int weights[5];
     int actionThreshold[5];
     
+    
+    // GUI
+    ofxPanel gui;
+    ofxIntSlider thres1;
+    ofxIntSlider thres2;
+    ofxIntSlider thres3;
+    ofxIntSlider thres4;
+    ofxIntSlider thres5;
+    ofxIntSlider threshold;
+    ofxIntSlider timeLimit;
+    ofxLabel fps;
+    string framerate;
+    vector<int> thres;
+    ofxToggle camSwitch;
+    bool bHide = false;
+    
+    // Background lines
+    ofPolyline line;
+    
+    
+    // TweenValues
+    /*ofxTween tweenexpo;
+    ofxEasingExpo 	easingexpo;
+    float scaleVal;*/
+    
 private:
     ofxSQLite* sqlite;
     vector<string> texts;
+    msa::Timer timer;
+    double stepCounter;
+    
+    float startTime;
 };
