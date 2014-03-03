@@ -8,7 +8,12 @@
 #include "ofxGui.h"
 #include "MSATimer.h"
 #include "ofxTween.h"
-
+/*
+typedef {
+    int i1;
+    int i2;
+}Indexes;
+*/
 class testApp : public ofBaseApp{
 
 	public:
@@ -88,6 +93,9 @@ class testApp : public ofBaseApp{
     unsigned duration = 2000;
     unsigned delay = 0;
     unsigned delay2 = 500;
+    
+    // Hightlighted Indexes
+    //vector<Indexes>
     
 private:
     ofxSQLite* sqlite;

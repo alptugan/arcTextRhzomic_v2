@@ -201,6 +201,8 @@ void testApp::draw(){
     if( !bHide ){
     
 		gui.draw();
+        ofSetColor(255);
+        fps = ofToString(ofGetFrameRate());
 	}
     
     // Check if there is any viewer in front of related region
@@ -218,9 +220,6 @@ void testApp::draw(){
         }
     }
     
-    ofSetColor(255);
-    fps = ofToString(ofGetFrameRate());
-    //ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 14);
 }
 
 //
