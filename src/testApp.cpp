@@ -67,19 +67,17 @@ void testApp::setup(){
     cout << "Sentence size : "<< SentenceNum << endl;
     
     sentences.resize(SentenceNum);
-    
+    speedVals.resize(SentenceNum);
     for (int j = 0; j < SentenceNum; j++) {
         Sentence *sentence = new Sentence(texts[j],font, 0, 12*j);
         sentences[j] = sentence;
-        sentences[j]->setSpeed(ofRandom(0.0008, 0.01));
+        speedVals[j] = ofRandom(0.0008, 0.01);
+        sentences[j]->setSpeed(speedVals[j]);
         sentences[j]->setFactorNoiseX(ofRandom(0.003, 0.02));
     }
     
     
-    // Tween Values
-    /*unsigned duration = 1000;
-    unsigned delay = 0;
-    tweenexpo.setParameters(1,easingexpo,ofxTween::easeOut,0,1,duration,delay);*/
+   
     
 }
 
@@ -160,11 +158,18 @@ void testApp::update(){
         
 	}
     
+    
     if(timer.getSeconds() > timeLimit) {
         
         timer.reset();
         isResetCalled=false;
         isNoMovement = true;
+    }
+    
+    for (int j = 0; j < SentenceNum; j++) {
+        sentences[j]->setScale(tweenexpo.update());
+        sentences[j]->speed = multitween.update();
+        sentences[j]->speed = multitween.getTarget((j+1));
     }
 }
 
@@ -226,13 +231,21 @@ void testApp::resetToDefaultValues() {
     if(!isResetCalled) {
         isResetCalled = true;
         //cout << "reset called" << endl;
+        multitween.setParameters(easingexpoSpeed,ofxTween::easeOut,0,ofGetWidth()-100,duration,delay2);
         for (int j = 0; j < SentenceNum; j++) {
-            sentences[j]->setSpeed(ofRandom(0.008, 0.01));
-            sentences[j]->setFactorNoiseX(ofRandom(0.008, 0.01));
-             sentences[j]->setScale(1);
+            
+            multitween.addValue(sentences[j]->speed, speedVals[j]);
+            //tweenexpo.setParameters(2,easingexpoSpeed,ofxTween::easeOut,sentences[j]->speed,speedVals[j],duration,delay2);
+            //sentences[j]->setFactorNoiseX(ofRandom(0.008, 0.01));
+            //sentences[j]->setScale(1);
         }
-        
+        multitween.start();
         timer.start();
+        
+        // Tween Values
+        scaleValStart = 0.2;
+        scaleValEnd = 1;
+        tweenexpo.setParameters(1,easingexpo,ofxTween::easeOut,scaleValStart,scaleValEnd,duration,delay);
         
     }
 }
@@ -243,13 +256,23 @@ void testApp::resetToDefaultValues() {
 void testApp::setIdleMode() {
     
     if(isNoMovement) {
-        for (int j = 0; j < SentenceNum; j++) {
-            sentences[j]->setSpeed(0.0008);
-            sentences[j]->setScale(0.2);
-            sentences[j]->setFactorNoiseX((j+4)*0.0003);
-        }
         
+        multitween.setParameters(easingexpoSpeed,ofxTween::easeOut,0,ofGetWidth()-100,duration,delay2);
+        
+        for (int j = 0; j < SentenceNum; j++) {
+            //sentences[j]->setSpeed(0.0008);
+            //tweenexpo.setParameters(2,easingexpoSpeed,ofxTween::easeOut,sentences[j]->speed,0.0008,duration,delay2+(j*10));
+            multitween.addValue(sentences[j]->speed, 0.0008);
+            //sentences[j]->setFactorNoiseX((j+4)*0.0003);
+        }
+        multitween.start();
+        
+        // Tween Values
+        scaleValStart = 1;
+        scaleValEnd = 0.2;
+        tweenexpo.setParameters(1,easingexpo,ofxTween::easeOut,scaleValStart,scaleValEnd,duration,delay);
         isNoMovement = false;
+        
     }
 }
 

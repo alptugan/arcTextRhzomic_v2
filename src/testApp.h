@@ -7,6 +7,7 @@
 #include "ofxOpenCv.h"
 #include "ofxGui.h"
 #include "MSATimer.h"
+#include "ofxTween.h"
 
 class testApp : public ofBaseApp{
 
@@ -36,6 +37,7 @@ class testApp : public ofBaseApp{
     ofxFontStash* font;
     int SentenceNum;
     vector<Sentence*> sentences;
+    vector<float> speedVals;
     
     float speed = 0.01f+ofRandomf()/100.f;
     float xPrev,yPrev;
@@ -76,9 +78,16 @@ class testApp : public ofBaseApp{
     
     
     // TweenValues
-    /*ofxTween tweenexpo;
+    ofxTween multitween;
+    ofxTween tweenexpo;
+    ofxTween tweenexpoSpeed;
     ofxEasingExpo 	easingexpo;
-    float scaleVal;*/
+    ofxEasingExpo 	easingexpoSpeed;
+    float scaleValEnd = 1;
+    float scaleValStart = 0.2;
+    unsigned duration = 2000;
+    unsigned delay = 0;
+    unsigned delay2 = 500;
     
 private:
     ofxSQLite* sqlite;

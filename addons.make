@@ -4,5 +4,5 @@ ofxGui
 ofxMSATimer
 ofxOpenCv
 ofxSQLite
-ofxUI
+ofxTween
 ofxUnicode
