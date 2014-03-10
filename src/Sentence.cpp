@@ -99,17 +99,24 @@ void Sentence::update(){
 
 void Sentence::draw(){
     
-	//ofSetColor(0,120,0);
-
 	int i = 0;
 
 	xoff = 0;
 
-	string currentChar; 
 	float x = 0;
-    p = ofGetMouseX();
-    l = p / 10;
-    //cout << l << endl;
+    
+    
+    // If there are no start/stop index do not calculate  scale factors
+    if(startShine.size() > 0 ) {
+        p = floor(10*(startShine[0] + stopShine[0]) / 2);
+        r = ofGetWidth() - p;
+    
+        l = p / 10;
+        m = r / 10;
+    
+        float incr = 1 / l;
+    }
+    
 	myFont->beginBatch();
 	while(x <= ofGetWidth()){
 		
@@ -118,7 +125,7 @@ void Sentence::draw(){
 		float y = yStart + ofMap(ofNoise(xoff, yoff), 0, 1, 0,400); // Option #1: 2D Noise
     
 		// Set the vertex
-		if(x > 0){
+		//if(x > 0){
             line.addVertex(ofVec2f(x,y));
 			if(i < strLen){
 
@@ -132,28 +139,75 @@ void Sentence::draw(){
                 ofPushMatrix();
 				ofTranslate(x,y);
 				ofRotateZ(arcTan);
-                //cout << line[i].getRotatedRad(x, y, 1.0f).z << endl;
-                //cout << arcTan << endl;
-				//float scaleVal = ofMap(x, 0, ofGetWidth(), 0, 0.9);
                
-                float scaleVal = ofMap(x, 0, ofGetWidth(), 0, 0.9);
-                
                 float alphaVal = ofMap(x,0,ofGetWidth(),10,255);
+               // useScaleFac = false;
                 
-                ofScale(scaleFac,scaleFac,1);
+                float scaleFac2 = incr;
+                
+                //cout << incr << endl;
+                /*
+                if(!useScaleFac) {
+                    ofScale(scaleFac2,scaleFac2,1);
+                   
+                }
+                else {
+                    ofScale(scaleFac2,scaleFac2,1);
+                }
+                
+                */
                 
                 
-                ofSetColor(255-(alphaVal));
-				if(i > startShine && i< stopShine){
-					ofSetColor(225,0,0);
+                
+                
+                
+                
+                 //cout << incr << endl;
+                
+                //ofSetColor(255-(alphaVal));
+                
+                // If start/stop index is lower than 0 do nothing set colors and incr to zero
+                if(startShine.size()>0) {
+                    
+                    if(x > startShine[0] * 10 && x < stopShine[0] * 10){
+                        
+                        // incr = 1;
+                        
+                        
+                    }else{
+                        
+                        if(x <= p){
+                            
+                            incr += 1/l;
+                            
+                        }else{
+                            incr -= 1/m;
+                        }
+                        
+                    }
+                    
+				if((i >= startShine[0] && i< stopShine[0]) || (i >= startShine[1] && i< stopShine[1])|| (i >= startShine[2] && i< stopShine[2])|| (i >= startShine[3] && i< stopShine[3]) || (i >= startShine[4] && i< stopShine[4])
+        ){
+                    
+					ofSetColor(0,col,0,255);
+                    ofScale(scaleFac,scaleFac,1);
+                    //ofScale(1,1,1);
 				}else{
-					ofSetColor(0,120,0);
+                    ofScale(scaleFac,scaleFac,1);
+                    //ofScale(0.8,0.8,1);
+					ofSetColor(0,100,0,255);
+				}
+                    
+                }else{
+                    ofScale(scaleFac,scaleFac,1);
+					//ofScale(0.2,0.2,1);
+                    ofSetColor(0,100,0,255);
 				}
                 
 				myFont->drawBatch(letters[i],24, 0, 0);
                 
                 ofPopMatrix();
-			}
+			//}
 		
 		i++;
 
@@ -174,11 +228,12 @@ void Sentence::draw(){
     
     //yoff += ofMap(ofGetMouseY(), 0, ofGetHeight(), 0.001,0.05);
     yoff += speed;
-    
+    ofSetColor(0,100,0,255);
 	line.draw();
     
     line.clear();
-
+    
+    
 } 
 
 void Sentence::setSpeed(float _speed){
@@ -193,11 +248,26 @@ void Sentence::setFactorNoiseX(float _x){
 
 void Sentence::setScale(float _scale) {
     scaleFac = _scale;
+    //col = ofMap(scaleFac,0.2,1,50,255);
 }
 
-void Sentence::highLight(float _startShine, float _stopShine){
-   
-	startShine = _startShine;
-	stopShine = _stopShine;
+void Sentence::setColor(int _color) {
+    col = _color;
 }
 
+void Sentence::highLight(vector<ofVec2f> hl, int _id){
+
+     stopShine.resize(stopShine.size()+1);
+     startShine.resize(startShine.size()+1);
+     startShine[startShine.size()-1] = hl[_id].x;
+     stopShine[stopShine.size()-1] = hl[_id].y;
+     
+     //cout << hl[_id].y << " , " <<hl[_id].x << endl;
+
+    //cout << _id << endl;
+}
+
+void Sentence::clearHighLight() {
+    startShine.clear();
+    stopShine.clear();
+}

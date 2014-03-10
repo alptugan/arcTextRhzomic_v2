@@ -8,12 +8,7 @@
 #include "ofxGui.h"
 #include "MSATimer.h"
 #include "ofxTween.h"
-/*
-typedef {
-    int i1;
-    int i2;
-}Indexes;
-*/
+
 class testApp : public ofBaseApp{
 
 	public:
@@ -57,7 +52,7 @@ class testApp : public ofBaseApp{
     ofxCvGrayscaleImage 	grayBg;
     bool				bLearnBakground;
 
-    bool mirror;
+   
     
     int weights[5];
     int actionThreshold[5];
@@ -72,21 +67,27 @@ class testApp : public ofBaseApp{
     ofxIntSlider thres5;
     ofxIntSlider threshold;
     ofxIntSlider timeLimit;
+    ofxToggle mirror;
     ofxLabel fps;
     string framerate;
     vector<int> thres;
     ofxToggle camSwitch;
-    bool bHide = false;
+    bool bHide = true;
     
     // Background lines
     ofPolyline line;
-    
+    int bgLineNum;
+    vector<int> bgLineAlpha;
     
     // TweenValues
     ofxTween multitween;
+    ofxTween multitweenColor;
+    
     ofxTween tweenexpo;
+    ofxTween bgNoise;
     ofxTween tweenexpoSpeed;
-    ofxEasingExpo 	easingexpo;
+    ofxTween tweenexpoColor;
+    ofxEasingLinear 	easingexpo;
     ofxEasingExpo 	easingexpoSpeed;
     float scaleValEnd = 1;
     float scaleValStart = 0.2;
@@ -94,8 +95,10 @@ class testApp : public ofBaseApp{
     unsigned delay = 0;
     unsigned delay2 = 500;
     
+    
     // Hightlighted Indexes
-    //vector<Indexes>
+    vector< vector<ofVec2f> > highlights;
+    int regionId;
     
 private:
     ofxSQLite* sqlite;

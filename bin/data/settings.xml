@@ -12,6 +12,9 @@
 	<Threshold_3st_Region>50</Threshold_3st_Region>
 	<Threshold_4st_Region>80</Threshold_4st_Region>
 	<Threshold_5st_Region>90</Threshold_5st_Region>
-<Threshold_Gray_Image>137</Threshold_Gray_Image>
-<Set_Delay_Time>8</Set_Delay_Time>
+<Threshold_Gray_Image>83</Threshold_Gray_Image>
+<Set_Delay_Time>3</Set_Delay_Time>
+<FrameRate>27.7325</FrameRate>
+	<Show_Video>0</Show_Video>
+	<Mirror_Video>1</Mirror_Video>
 </group>

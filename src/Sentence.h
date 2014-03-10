@@ -5,6 +5,7 @@
 #include "ofxFontStash.h"
 #include <set>
 #include "ofUTF8.h"
+#include "ofxTween.h"
 
 struct Letter{
     char * letter_;
@@ -29,7 +30,7 @@ public:
 	void setSpeed(float);
     void setFactorNoiseX(float _x);
     void setScale(float _scale);
-
+    void setColor(int color);
    
     float scaleFac = 1;
 	float speed;
@@ -40,17 +41,31 @@ public:
     float xFactor;
 	float xPrev;
 	float yPrev;
-    float p ;
-    float l;
+    float p ;//left of the mouse
+    float r ;//right of the mouse
+    float l; // no of left segments
+    float m; // no of right segments
+    float incr;
+    int indy = 0;
+    
+    int col ;
+    int colDown = 50;
+    int col2;
+    
+	vector<int> startShine,stopShine;
+    
+    bool useScaleFac = true;
 
-	float startShine,stopShine;
-
-	void highLight(float,float);
+	void highLight(vector<ofVec2f> hl,int i);
+    void clearHighLight();
     
     ofPolyline line;
     
     vector<string> letters;
+    
+    
 
  private: // place private functions or variables declarations here
+
 };
 
