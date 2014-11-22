@@ -16,4 +16,3 @@ Dependencies:
 4. ofxGui (OF default addon)
 5. [ofxFontStash](https://github.com/armadillu/ofxFontStash "by Armadillu")
 6. [ofxUnicode](https://github.com/bakercp/ofxUnicode "by BakerCp") 
-
